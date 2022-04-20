@@ -51,6 +51,7 @@ class chatDB:
         pass
 
     def getOnlineUsers(self):
+        return(self.excuteSql("SELECT Users.User as username FROM Users WHERE Status =1"))
         """Get all online users
 
         Return: list of online users
@@ -60,7 +61,6 @@ class chatDB:
 
     def getAllUsers(self):
         return (self.excuteSql("SELECT Users.User as username FROM Users"))
-
         """Get all online users
 
         Return: list of all users
