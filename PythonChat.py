@@ -173,6 +173,11 @@ class chatDB:
             'invalid': log-out failed. The cookie does not exist.
         """
         # You have to implement this method
+        try:
+            self.excuteSql("DELETE FROM Cookies WHERE Cookie = '" + cookie + "'")
+            return 'success'
+        except:
+            return 'invalid'
         pass
         
     # you can define more method here
@@ -257,7 +262,7 @@ class ThreadedServer:
         elif request[0] == 'LOGIN' : #end
             return chatdb.login(request[1], request[2])
         elif request[0] == 'LOGOUT' :
-            return chatdb.logout()
+            return chatdb.logout(request[1])
         else:
             pass
         """Process a request of a client
