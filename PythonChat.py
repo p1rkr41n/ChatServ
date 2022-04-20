@@ -1,4 +1,5 @@
 import ast
+from cmath import e
 import re
 import sys
 import socket
@@ -6,7 +7,7 @@ import sqlite3
 import datetime
 import json
 import time
-from random import randint
+import random
 import threading
 from traceback import print_tb
 from unittest import result
@@ -124,8 +125,8 @@ class chatDB:
             return 'invalid_wd'
         else:
             try:
-                hashpw = hashlib.sha1(wd.encode()).hexdigest()
-                self.excuteSql("INSERT INTO Users VALUES ('" + usr + "','" + hashpw + "',0)")
+                hashpwd = hashlib.sha1(wd.encode()).hexdigest()
+                self.excuteSql("INSERT INTO Users VALUES ('" + usr + "','" + hashpwd + "',0)")
                 return 'success'
             except :
                 return 'invalid_usr'
@@ -140,6 +141,19 @@ class chatDB:
             'invalid_wd': login failed because of wrong word.
         """
         # You have to implement this method
+        hashpwd = hashlib.sha1(wd.encode()).hexdigest()
+        try:
+            self.excuteSql("SELECT 1 FROM Users WHERE User = '" + usr + "' AND Passwd='" + hashpwd +"'" )[0]
+            self.excuteSql("UPDATE Users SET Status = 1 WHERE User = '" + usr + "'" )
+            cookie = ''.join((random.choice('0123456789') for i in range(16)))
+            timestamp =str(int(time.time()))
+            # print("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') " )
+            self.excuteSql("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') ")
+            return ['success', cookie]
+        except e:
+            print(e)
+            return 'invalid_usr'
+            # return e
         pass
 
     def logout(self, cookie):
@@ -233,7 +247,7 @@ class ThreadedServer:
         elif request[0] == 'REG' :
             return chatdb.register( request[1], request[2] )
         elif request[0] == 'LOGIN' :
-            return chatdb.login()
+            return chatdb.login(request[1], request[2])
         elif request[0] == 'LOGOUT' :
             return chatdb.logout()
         else:
