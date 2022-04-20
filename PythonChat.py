@@ -148,10 +148,18 @@ class chatDB:
             cookie = ''.join((random.choice('0123456789') for i in range(16)))
             timestamp =str(int(time.time()))
             # print("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') " )
-            self.excuteSql("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') ")
+            while True:
+                try:
+                    self.excuteSql("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') ")
+                    break
+                except:
+                    if cookie == "9"*16:
+                        cookie= "0"*16
+                    cookie = format(str(int(cookie) + 1), '016d')
+
             return ['success', cookie]
         except e:
-            print(e)
+            # print(e)
             return 'invalid_usr'
             # return e
         pass
@@ -234,9 +242,9 @@ class ThreadedServer:
 
     def processRequest(self, request):
         global chatdb
-        if request[0] == 'ONLINE' :
+        if request[0] == 'ONLINE' : #end
             return chatdb.getOnlineUsers()
-        elif request[0] == 'ALL' :
+        elif request[0] == 'ALL' : #end
             return chatdb.getAllUsers()
         elif request[0] == 'GET' :
             return chatdb.getAllMsgs()
@@ -244,9 +252,9 @@ class ThreadedServer:
             return chatdb.getNewMsgs()
         elif request[0] == 'SEND' :
             return chatdb.sendMsg()
-        elif request[0] == 'REG' :
+        elif request[0] == 'REG' :  #end
             return chatdb.register( request[1], request[2] )
-        elif request[0] == 'LOGIN' :
+        elif request[0] == 'LOGIN' : #end
             return chatdb.login(request[1], request[2])
         elif request[0] == 'LOGOUT' :
             return chatdb.logout()
