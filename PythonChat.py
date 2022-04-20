@@ -11,6 +11,7 @@ import threading
 from traceback import print_tb
 from unittest import result
 from createSqlite import createSqlChat
+import hashlib
 
 class chatDB:
     """Database for chat
@@ -117,6 +118,17 @@ class chatDB:
             'invalid_': failed. The word is not valid.
         """
         # You have to implement this method
+        if len(usr) < 3 or len(usr) > 10:
+            return 'invalid_usr'
+        elif len(wd) < 3 or len(wd) > 10:
+            return 'invalid_wd'
+        else:
+            try:
+                hashpw = hashlib.sha1(wd.encode()).hexdigest()
+                self.excuteSql("INSERT INTO Users VALUES ('" + usr + "','" + hashpw + "',0)")
+                return 'success'
+            except :
+                return 'invalid_usr'
         pass
 
     def login(self, usr, wd):
@@ -219,7 +231,7 @@ class ThreadedServer:
         elif request[0] == 'SEND' :
             return chatdb.sendMsg()
         elif request[0] == 'REG' :
-            return chatdb.register()
+            return chatdb.register( request[1], request[2] )
         elif request[0] == 'LOGIN' :
             return chatdb.login()
         elif request[0] == 'LOGOUT' :
