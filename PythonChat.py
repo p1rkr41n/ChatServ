@@ -81,6 +81,19 @@ class chatDB:
                 example: [['manh', 'thanh', 'Hello', '2018-20-06 18:21:26', 'yet']]
         """
         # You have to implement this method
+        Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
+        Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ usr2 +"'")
+        if Sender  != []:    
+            if Recv != []:
+                try:
+                    # GET all messege sql
+                    # self.excuteSql("SELECT Content FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'")
+                    return self.convertToList(self.excuteSql("SELECT Content FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'"))
+                except:
+                    return 'invalid_usr'
+        else :
+            return "invalid_cook"
+
         pass
 
     def getNewMsgs(self, cookie, frm):
@@ -199,6 +212,11 @@ class chatDB:
         result = cursor.execute(query).fetchall()
         connection.commit()
         return result
+    def convertToList(self, result):
+        resultList = []
+        for i in result:
+            resultList.append(i[0].encode('utf-8'))
+        return resultList
     # Clear cookies
 
 class ThreadedServer:
@@ -265,7 +283,7 @@ class ThreadedServer:
         elif request[0] == 'ALL' : #end
             return chatdb.getAllUsers()
         elif request[0] == 'GET' :
-            return chatdb.getAllMsgs()
+            return chatdb.getAllMsgs(request[1], request[2])
         elif request[0] == 'NEW' :
             return chatdb.getNewMsgs()
         elif request[0] == 'SEND' :
