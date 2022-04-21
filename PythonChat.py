@@ -88,7 +88,9 @@ class chatDB:
                 try:
                     # GET all messege sql
                     # self.excuteSql("SELECT Content FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'")
-                    return self.convertToList(self.excuteSql("SELECT Content FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'"))
+                    
+                    return self.convertToList(self.excuteSql("SELECT * FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'"))
+                    # return self.excuteSql("SELECT * FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'")
                 except:
                     return 'invalid_usr'
         else :
@@ -215,7 +217,9 @@ class chatDB:
     def convertToList(self, result):
         resultList = []
         for i in result:
-            resultList.append(i[0].encode('utf-8'))
+            resultList.append([])
+            for j in i:
+                resultList[-1].append(str(j))
         return resultList
     # Clear cookies
 
