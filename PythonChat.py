@@ -26,7 +26,7 @@ class chatDB:
         if createNew == True:
             createSqlChat()
         # You have to implement this method
-            self.start()
+            # self.start()
         pass
 
     def start(self):
@@ -35,7 +35,9 @@ class chatDB:
         Background tasks: cookie cleaner
         """
         # You have to implement this method
-        
+        clearCookies = threading.Thread(target= self.autoClear)
+        clearCookies.start()
+
         pass
 
     def stop(self):
@@ -52,6 +54,17 @@ class chatDB:
         Should be called in self.start
         """
         # You have to implement this method
+        time.sleep(599)
+        while True:
+            self.excuteSql("DELETE FROM Cookies WHERE Last_acc < " + str(int(time.time())-600))
+            countdown = self.excuteSql("SELECT Last_acc FROM Cookies WHERE Cookie = (SELECT min(Cookie) FROM Cookies )")
+            # SELECT * FROM Cookies WHERE Cookie = (SELECT min(Cookie) FROM Cookies ) # get element min
+            print("Recount")
+            try:
+                time.sleep(countdown[0][0])
+            except:
+                time.sleep(600)
+            pass
         pass
 
     def getOnlineUsers(self):
@@ -83,6 +96,7 @@ class chatDB:
                 example: [['manh', 'thanh', 'Hello', '2018-20-06 18:21:26', 'yet']]
         """
         # You have to implement this method
+        self.updateTimeStamp(cookie)
         Recv =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
         Sender =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ usr2 +"'")
         if Recv  != []:    
@@ -107,6 +121,7 @@ class chatDB:
                 example: [['Hello', '2018-20-06 18:21:26']]
         """ 
         # You have to implement this method
+        self.updateTimeStamp(cookie)
         Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
         Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ frm +"'")
         if Sender  != []:    
@@ -134,6 +149,7 @@ class chatDB:
             + 'success'
         """
         # You have to implement this method
+        self.updateTimeStamp(cookie)
         Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
         Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ to +"'")
         if Sender  != []:    
@@ -233,6 +249,8 @@ class chatDB:
             for j in i:
                 resultList[-1].append(str(j))
         return resultList
+    def updateTimeStamp(self, cookie):
+        self.excuteSql("UPDATE Cookies SET Last_acc = '" + str(int(time.time())) + "' WHERE Cookie = '" + cookie + "'")
     # Clear cookies
 
 class ThreadedServer:
@@ -317,7 +335,7 @@ class ThreadedServer:
             else:
                 return 'invalid'
         else:
-            return 'invalid by regex Func'
+            return 'invalid'
         """Process a request of a client
 	    A request is in the form:
 	        ['ONLINE'] => getOnlineUsers
@@ -339,6 +357,7 @@ class ThreadedServer:
             return False
         else:
             return True
+
 chatdb = None
 if __name__ == "__main__":
     if len(sys.argv) != 4:
@@ -356,4 +375,5 @@ if __name__ == "__main__":
 
     chatdb = chatDB(dbFile, createNew)
     chatdb.start()
+
     ThreadedServer('', port).listen(50)
