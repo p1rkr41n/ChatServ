@@ -81,16 +81,13 @@ class chatDB:
                 example: [['manh', 'thanh', 'Hello', '2018-20-06 18:21:26', 'yet']]
         """
         # You have to implement this method
-        Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
-        Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ usr2 +"'")
-        if Sender  != []:    
-            if Recv != []:
+        Recv =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
+        Sender =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ usr2 +"'")
+        if Recv  != []:    
+            if Sender != []:
                 try:
                     # GET all messege sql
-                    # self.excuteSql("SELECT Content FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'")
-                    
-                    return self.convertToList(self.excuteSql("SELECT * FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'"))
-                    # return self.excuteSql("SELECT * FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'")
+                    return self.convertToList(self.excuteSql("SELECT * FROM Msgs WHERE (Sender = '"+ Sender[0][0] +"' OR Sender = '"+ Recv[0][0] +"') and ( Receiver = '"+ Recv[0][0] +"' OR Receiver = '"+ Sender[0][0] +"') ORDER BY Timestamp ASC")) 
                 except:
                     return 'invalid_usr'
         else :
@@ -107,8 +104,22 @@ class chatDB:
             + 'invalid_cook': if cookie is invalid
             + [[content, time],...]
                 example: [['Hello', '2018-20-06 18:21:26']]
-        """
+        """ 
         # You have to implement this method
+        Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
+        Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ frm +"'")
+        if Sender  != []:    
+            if Recv != []:
+                try:
+                    # GET all messege sql
+                    return self.convertToList(self.excuteSql("SELECT Content, Timestamp FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'"))
+                except:
+                    return 'invalid_usr'
+        else :
+            return "invalid_cook"
+
+        pass
+
         pass
 
     def sendMsg(self, cookie, to, content):
@@ -289,7 +300,7 @@ class ThreadedServer:
         elif request[0] == 'GET' :
             return chatdb.getAllMsgs(request[1], request[2])
         elif request[0] == 'NEW' :
-            return chatdb.getNewMsgs()
+            return chatdb.getNewMsgs(request[1], request[2])
         elif request[0] == 'SEND' :
             return chatdb.sendMsg(request[1], request[2], request[3])
         elif request[0] == 'REG' :  #end
@@ -313,7 +324,6 @@ class ThreadedServer:
 	    """
         # You have to implement this method
         pass
-
 
 chatdb = None
 if __name__ == "__main__":
