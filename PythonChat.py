@@ -107,6 +107,18 @@ class chatDB:
             + 'success'
         """
         # You have to implement this method
+        Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
+        Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ to +"'")
+        if Sender  != []:    
+            if Recv != []:
+                try:
+                    self.excuteSql("INSERT INTO Msgs VALUES ('" + Sender[0][0] + "','" + Recv[0][0] + "','" + content + "','" + str(int(time.time())) + "',0)")
+                    return 'success'
+                except:
+                    return 'invalid_usr'
+        else :
+            return "invalid_cook"
+
         pass
 
     def register(self, usr, wd):
@@ -187,6 +199,7 @@ class chatDB:
         result = cursor.execute(query).fetchall()
         connection.commit()
         return result
+    # Clear cookies
 
 class ThreadedServer:
     def __init__(self, host, port):
@@ -256,7 +269,7 @@ class ThreadedServer:
         elif request[0] == 'NEW' :
             return chatdb.getNewMsgs()
         elif request[0] == 'SEND' :
-            return chatdb.sendMsg()
+            return chatdb.sendMsg(request[1], request[2], request[3])
         elif request[0] == 'REG' :  #end
             return chatdb.register( request[1], request[2] )
         elif request[0] == 'LOGIN' : #end
