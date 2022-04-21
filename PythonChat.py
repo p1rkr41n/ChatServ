@@ -9,8 +9,8 @@ import json
 import time
 import random
 import threading
-from traceback import print_tb
-from unittest import result
+# from traceback import print_tb
+# from unittest import result
 from createSqlite import createSqlChat
 import hashlib
 
@@ -26,6 +26,7 @@ class chatDB:
         if createNew == True:
             createSqlChat()
         # You have to implement this method
+            self.start()
         pass
 
     def start(self):
@@ -34,6 +35,7 @@ class chatDB:
         Background tasks: cookie cleaner
         """
         # You have to implement this method
+        
         pass
 
     def stop(self):
@@ -53,7 +55,7 @@ class chatDB:
         pass
 
     def getOnlineUsers(self):
-        return(self.excuteSql("SELECT Users.User as username FROM Users WHERE Status =1"))
+        return( self.convertToList(self.excuteSql("SELECT Users.User as username FROM Users WHERE Status =1")))
         """Get all online users
 
         Return: list of online users
@@ -62,7 +64,7 @@ class chatDB:
         pass
 
     def getAllUsers(self):
-        return (self.excuteSql("SELECT Users.User as username FROM Users"))
+        return (self.convertToList(self.excuteSql("SELECT Users.User as username FROM Users")))
         """Get all online users
 
         Return: list of all users
@@ -94,7 +96,6 @@ class chatDB:
             return "invalid_cook"
 
         pass
-
     def getNewMsgs(self, cookie, frm):
         """Return all new messages from FRM sending to owner of COOKIE.
         All those new messages will be set to be already read.
@@ -259,11 +260,14 @@ class ThreadedServer:
                 ###
                 # log down error, may be into db
                 ###
-                return
+                return 
             else:
                 # convert string representation of any type to that type
-                request = ast.literal_eval(data)
-                response = self.processRequest(request)
+                try:
+                    request = ast.literal_eval(data)
+                    response = self.processRequest(request)
+                except:
+                    response = "invalid"
                 # convert any type of response to string representation
                 data = str(response)
                 try:
@@ -293,24 +297,27 @@ class ThreadedServer:
 
     def processRequest(self, request):
         global chatdb
-        if request[0] == 'ONLINE' : #end
-            return chatdb.getOnlineUsers()
-        elif request[0] == 'ALL' : #end
-            return chatdb.getAllUsers()
-        elif request[0] == 'GET' :
-            return chatdb.getAllMsgs(request[1], request[2])
-        elif request[0] == 'NEW' :
-            return chatdb.getNewMsgs(request[1], request[2])
-        elif request[0] == 'SEND' :
-            return chatdb.sendMsg(request[1], request[2], request[3])
-        elif request[0] == 'REG' :  #end
-            return chatdb.register( request[1], request[2] )
-        elif request[0] == 'LOGIN' : #end
-            return chatdb.login(request[1], request[2])
-        elif request[0] == 'LOGOUT' :
-            return chatdb.logout(request[1])
+        if self.regex(request):
+            if request[0] == 'ONLINE' :
+                return chatdb.getOnlineUsers()
+            elif request[0] == 'ALL' :
+                return chatdb.getAllUsers()
+            elif request[0] == 'GET' :
+                return chatdb.getAllMsgs(request[1], request[2])
+            elif request[0] == 'NEW' :
+                return chatdb.getNewMsgs(request[1], request[2])
+            elif request[0] == 'SEND' :
+                return chatdb.sendMsg(request[1], request[2], request[3])
+            elif request[0] == 'REG' :  
+                return chatdb.register( request[1], request[2] )
+            elif request[0] == 'LOGIN' : 
+                return chatdb.login(request[1], request[2])
+            elif request[0] == 'LOGOUT' :
+                return chatdb.logout(request[1])
+            else:
+                return 'invalid'
         else:
-            pass
+            return 'invalid by regex Func'
         """Process a request of a client
 	    A request is in the form:
 	        ['ONLINE'] => getOnlineUsers
@@ -324,7 +331,14 @@ class ThreadedServer:
 	    """
         # You have to implement this method
         pass
-
+    def regex(self, request):
+        check = ""
+        for i in request:
+            check += i
+        if check.find('[') != -1 or check.find(']') != -1 or check.find('\n') != -1 or  check.find('\\') != -1 or  check.find('"') != -1 :
+            return False
+        else:
+            return True
 chatdb = None
 if __name__ == "__main__":
     if len(sys.argv) != 4:
