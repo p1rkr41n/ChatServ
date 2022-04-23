@@ -56,8 +56,8 @@ class chatDB:
         # You have to implement this method
         time.sleep(599)
         while True:
-            self.excuteSql("DELETE FROM Cookies WHERE Last_acc < " + str(int(time.time())-600))
-            countdown = self.excuteSql("SELECT Last_acc FROM Cookies WHERE Cookie = (SELECT min(Cookie) FROM Cookies )")
+            self.executeSql("DELETE FROM Cookies WHERE Last_acc < " + str(int(time.time())-600))
+            countdown = self.executeSql("SELECT Last_acc FROM Cookies WHERE Cookie = (SELECT min(Cookie) FROM Cookies )")
             # SELECT * FROM Cookies WHERE Cookie = (SELECT min(Cookie) FROM Cookies ) # get element min
             print("Recount")
             try:
@@ -68,7 +68,7 @@ class chatDB:
         pass
 
     def getOnlineUsers(self):
-        return( self.convertToList(self.excuteSql("SELECT Users.User as username FROM Users WHERE Status =1")))
+        return( self.convertToList(self.executeSql("SELECT Users.User as username FROM Users WHERE Status =1")))
         """Get all online users
 
         Return: list of online users
@@ -77,7 +77,7 @@ class chatDB:
         pass
 
     def getAllUsers(self):
-        return (self.convertToList(self.excuteSql("SELECT Users.User as username FROM Users")))
+        return (self.convertToList(self.executeSql("SELECT Users.User as username FROM Users")))
         """Get all online users
 
         Return: list of all users
@@ -97,13 +97,13 @@ class chatDB:
         """
         # You have to implement this method
         self.updateTimeStamp(cookie)
-        Recv =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
-        Sender =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ usr2 +"'")
+        Recv =  self.executeSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
+        Sender =  self.executeSql("SELECT User FROM Users WHERE User = '"+ usr2 +"'")
         if Recv  != []:    
             if Sender != []:
                 try:
                     # GET all messege sql
-                    return self.convertToList(self.excuteSql("SELECT * FROM Msgs WHERE (Sender = '"+ Sender[0][0] +"' OR Sender = '"+ Recv[0][0] +"') and ( Receiver = '"+ Recv[0][0] +"' OR Receiver = '"+ Sender[0][0] +"') ORDER BY Timestamp ASC")) 
+                    return self.convertToList(self.executeSql("SELECT * FROM Msgs WHERE (Sender = '"+ Sender[0][0] +"' OR Sender = '"+ Recv[0][0] +"') and ( Receiver = '"+ Recv[0][0] +"' OR Receiver = '"+ Sender[0][0] +"') ORDER BY Timestamp ASC")) 
                 except:
                     return 'invalid_usr'
         else :
@@ -122,13 +122,13 @@ class chatDB:
         """ 
         # You have to implement this method
         self.updateTimeStamp(cookie)
-        Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
-        Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ frm +"'")
+        Sender =  self.executeSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
+        Recv =  self.executeSql("SELECT User FROM Users WHERE User = '"+ frm +"'")
         if Sender  != []:    
             if Recv != []:
                 try:
                     # GET all messege sql
-                    return self.convertToList(self.excuteSql("SELECT Content, Timestamp FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'"))
+                    return self.convertToList(self.executeSql("SELECT Content, Timestamp FROM Msgs WHERE Sender = '"+ Sender[0][0] +"' and Receiver = '"+ Recv[0][0] +"'"))
                 except:
                     return 'invalid_usr'
         else :
@@ -150,12 +150,12 @@ class chatDB:
         """
         # You have to implement this method
         self.updateTimeStamp(cookie)
-        Sender =  self.excuteSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
-        Recv =  self.excuteSql("SELECT User FROM Users WHERE User = '"+ to +"'")
+        Sender =  self.executeSql("SELECT User FROM Cookies WHERE Cookie = '"+ cookie +"'")
+        Recv =  self.executeSql("SELECT User FROM Users WHERE User = '"+ to +"'")
         if Sender  != []:    
             if Recv != []:
                 try:
-                    self.excuteSql("INSERT INTO Msgs VALUES ('" + Sender[0][0] + "','" + Recv[0][0] + "','" + content + "','" + str(int(time.time())) + "',0)")
+                    self.executeSql("INSERT INTO Msgs VALUES ('" + Sender[0][0] + "','" + Recv[0][0] + "','" + content + "','" + str(int(time.time())) + "',0)")
                     return 'success'
                 except:
                     return 'invalid_usr'
@@ -181,7 +181,7 @@ class chatDB:
         else:
             try:
                 hashpwd = hashlib.sha1(wd.encode()).hexdigest()
-                self.excuteSql("INSERT INTO Users VALUES ('" + usr + "','" + hashpwd + "',0)")
+                self.executeSql("INSERT INTO Users VALUES ('" + usr + "','" + hashpwd + "',0)")
                 return 'success'
             except :
                 return 'invalid_usr'
@@ -198,14 +198,14 @@ class chatDB:
         # You have to implement this method
         hashpwd = hashlib.sha1(wd.encode()).hexdigest()
         try:
-            self.excuteSql("SELECT 1 FROM Users WHERE User = '" + usr + "' AND Passwd='" + hashpwd +"'" )[0]
-            self.excuteSql("UPDATE Users SET Status = 1 WHERE User = '" + usr + "'" )
+            self.executeSql("SELECT 1 FROM Users WHERE User = '" + usr + "' AND Passwd='" + hashpwd +"'" )[0]
+            self.executeSql("UPDATE Users SET Status = 1 WHERE User = '" + usr + "'" )
             cookie = ''.join((random.choice('0123456789') for i in range(16)))
             timestamp =str(int(time.time()))
             # print("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') " )
             while True:
                 try:
-                    self.excuteSql("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') ")
+                    self.executeSql("INSERT INTO Cookies VALUES ('" + cookie + "','" + usr + "', '" + timestamp + "') ")
                     break
                 except:
                     if cookie == "9"*16:
@@ -229,14 +229,14 @@ class chatDB:
         """
         # You have to implement this method
         try:
-            self.excuteSql("DELETE FROM Cookies WHERE Cookie = '" + cookie + "'")
+            self.executeSql("DELETE FROM Cookies WHERE Cookie = '" + cookie + "'")
             return 'success'
         except:
             return 'invalid'
         pass
         
     # you can define more method here
-    def excuteSql(self, query):
+    def executeSql(self, query):
         connection = sqlite3.connect('./chat.sqlite')
         cursor = connection.cursor()
         result = cursor.execute(query).fetchall()
@@ -250,7 +250,7 @@ class chatDB:
                 resultList[-1].append(str(j))
         return resultList
     def updateTimeStamp(self, cookie):
-        self.excuteSql("UPDATE Cookies SET Last_acc = '" + str(int(time.time())) + "' WHERE Cookie = '" + cookie + "'")
+        self.executeSql("UPDATE Cookies SET Last_acc = '" + str(int(time.time())) + "' WHERE Cookie = '" + cookie + "'")
     # Clear cookies
 
 class ThreadedServer:
